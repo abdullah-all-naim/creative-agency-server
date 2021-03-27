@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = 5000
+const port = 8000
 const MongoClient = require('mongodb').MongoClient;
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -12,21 +12,66 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(fileUpload());
 
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.guqdp.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+// mongodb+srv://naim:<password>@cluster0.u5omi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.guqdp.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+const uri = 'mongodb+srv://naim:naim007@cluster0.u5omi.mongodb.net/foodscape?retryWrites=true&w=majority'
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
     // root
     app.get('/', (req, res) => {
         res.send('Hello World!')
     })
-    const addCustomerData = client.db("CreativeAgency").collection("customerdata");
-    const addCustomerOrder = client.db("CreativeAgency").collection("customerorder");
-    const addService = client.db("CreativeAgency").collection("addservice");
-    const adminAccess = client.db("CreativeAgency").collection("admin");
-    console.log('db connection success')
+    const addUser = client.db("foodscape").collection("users");
+    const donateInfo = client.db("foodscape").collection("donate");
+    const leader = client.db("foodscape").collection("leaderboard");
+    app.post("/users", (req, res) => {
+        const userInfo = req.body;
+        addUser.insertOne(userInfo)
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+    })
 
-    // add review
+    app.get('/userinfos', (req, res) => {
+        addUser.find({token : req.query.token})
+            .toArray((err, documents) => {
+                res.send(documents)
+            })
+    })
+    app.post("/whodonate", (req, res) => {
+        const user = req.body;
+        donateInfo.insertOne(user)
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+    })
+    app.get('/infos', (req, res) => {
+        donateInfo.find({})
+            .toArray((err, documents) => {
+                res.send(documents)
+            })
+    })
+    app.get('/donateinfos', (req, res) => {
+        donateInfo.find({email : req.query.email})
+            .toArray((err, documents) => {
+                res.send(documents)
+            })
+    })
+    app.post("/leader", (req, res) => {
+        const user = req.body;
+        leader.updateOne()
+    })
+
+    app.get('/leaderinfo', (req, res) => {
+        leader.find({})
+            .toArray((err, documents) => {
+                res.send(documents)
+            })
+    })
+
+
+
+
     app.post("/customerreview", (req, res) => {
         const reviewerImage = req.files.file;
         const reviewName = req.body.name;
@@ -95,10 +140,12 @@ client.connect(err => {
     // // query 
     app.get('/getorderinfo', (req, res) => {
         addCustomerOrder.find({ email: req.query.email })
+        console.log(addCustomerOrder.find({ email: req.query.email }))
             .toArray((err, documents) => {
                 res.send(documents)
             })
     })
+    // console.log(addCustomerOrder)
     // get orderinfo
     app.get('/customersorderinfo', (req, res) => {
         addCustomerOrder.find({})
