@@ -20,12 +20,9 @@
   },
   "devDependencies": {},
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/abdullah-all-naim/creative-agency-server.git"
+    "type": "git"
   },
   "bugs": {
-    "url": "https://github.com/abdullah-all-naim/creative-agency-server/issues"
   },
-  "homepage": "https://github.com/abdullah-all-naim/creative-agency-server#readme",
   "description": ""
 }
